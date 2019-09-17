@@ -10,7 +10,7 @@ Jupyter (allows use of jupyter notebook Python 3 interactive environment)
 Geopandas (integrates other packages geospatial components)
 Matplotlib (dataviz package - allows plotting of visualizations)
 
-If the notebook will not run within Github, here is an [HTML version](#).
+If the notebook will not run within Github, here is an [HTML version](https://github.com/rakatk0/2016-StopQuestionFrisk/blob/master/rakatk0-python-pandas-geopandas-101.html).
 
 ### Basic webmapping, using Leaflet
 
