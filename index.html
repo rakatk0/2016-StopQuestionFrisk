@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>2016 NYC "Stop Question & Frisk" Incidents</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  <style>
+    #map {
+      height: 540px;
+    }
+
+    p    {margin-left: 1rem}
+
+    /* Small devices (landscape phones, 576px and up) */
+    @media (min-width: 576px) {}
+
+    /* Medium devices (tablets, 768px and up) */
+    @media (min-width: 768px) {
+
+      aside {
+        height: 540px;
+      }
+    }
+
+    /* Large devices (desktops, 992px and up) */
+    @media (min-width: 992px) {}
+
+    /* Extra large devices (large desktops, 1200px and up) */
+    @media (min-width: 1200px) {}
+  </style>
+</head>
+
+<body class="bg-dark">
+
+  <div class="container-fluid">
+    <header class="row text-white py-3">
+      <div class="col mx-2">
+        <h1 class="">2016 NYC "Stop Question & Frisk" Incidents</h1>
+      </div>
+    </header>
+
+    <section class="row">
+      <div class="col-12 col-md-8 col-lg-9 px-0">
+        <div id="map"></div>
+      </div>
+      <aside id="about" class="col-12 col-md-4 col-lg-3 text-white py-2 bg-secondary overflow-auto">
+        <section>
+          <!-- time slider here -->
+          <div class="row align-items-center">
+            <div class="col-sm-2">
+              <p id="value-time"></p>
+            </div>
+            <div class="col-sm">
+              <div id="slider-time"></div>
+            </div>
+            <h2>About this map</h2>
+            <p>It is well-known that New York City utilizes a controversial strategy known as "Stop, Question and
+              Frisk." Data on these incidents has been compiled by the NYPD for over a decade. Though incidents have
+              declined significantly in recent years, the policy continues.</p>
+            <p>This map showcases 2016 data. Utilizing Python and Geopandas in a Jupyter Notebook environment, data was
+              wrangled and prepared for use in this Leaflet webmap. </p>
+        </section>
+      </aside>
+    </section>
+    <footer class="row text-white py-3">
+      <div class="col mx-2">
+        <ul class="list-unstyled">
+          <li><a href="https://twitter.com/mapmethod">@mapmethod</a></li>
+          <li>Created for MAP674 Fall 2019 by Ritchie</li>
+          <li><a href="https://www1.nyc.gov/site/nypd/stats/reports-analysis/stopfrisk.page">NYPD Stop Question Frisk data source</a></li>
+        </ul>
+      </div>
+    </footer>
+  </div>
+
+
+  <!-- add all JavaScript libraries below  -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+  </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+  </script>
+  <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://unpkg.com/d3-simple-slider@1.5.4/dist/d3-simple-slider.min.js"></script>
+
+
+
+  <script>
+    const options = {
+      center: [40.7, -73.9], // center to NYC
+      zoom: 11.5,
+      zoomSnap: .1
+    }
+    const map = L.map('map', options);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // use d3 to load data
+    d3.json('./data/2016stops.geojson').then(drawMap);
+
+    function drawMap(data) {
+
+      const stops = L.geoJson(data, {
+        pointToLayer: function (features, ll) {
+          return L.circleMarker(ll);
+
+        },
+        style: function (feature) {
+          return {
+            color: 'orange',
+            radius: 2,
+            opacity: .1
+          }
+        },
+        onEachFeature: function (feature, layer) {
+          if (feature.properties.datestop) {
+
+            // make number a string
+            let date = feature.properties.datestop.toString();
+
+            // insert slashes
+            if (date.length == 7) {
+              date = '0' + date.slice(0, 1) + '/' + date.slice(1, 3) + '/' + date.slice(3, 7);
+            } else {
+              date = date.slice(0, 2) + '/' + date.slice(2, 4) + '/' + date.slice(4, 8);
+            }
+            // bind formatted date string as tooltip
+            layer.bindTooltip(date);
+          }
+        }
+      }).addTo(map);
+
+    }
+
+    // Time Slider
+    var dataTime = d3.range(0, 10).map(function (d) {
+      return new Date(0000 + d, 10, 3);
+    });
+
+    var sliderTime = d3
+      .sliderBottom()
+      .min(d3.min(dataTime))
+      .max(d3.max(dataTime))
+      .step(1)
+      .width(300)
+      .tickFormat(d3.timeFormat('%Y'))
+      .tickValues(dataTime)
+      .default(new Date(0000, 10, 3))
+      .on('onchange', val => {
+        d3.select('p#value-time').text(d3.timeFormat('%Y')(val));
+      });
+
+    var gTime = d3
+      .select('div#slider-time')
+      .append('svg')
+      .attr('width', 500)
+      .attr('height', 100)
+      .append('g')
+      .attr('transform', 'translate(30,30)');
+
+    gTime.call(sliderTime);
+
+    d3.select('p#value-time').text(d3.timeFormat('%Y')(sliderTime.value()));
+  </script>
+</body>
+
+</html>
