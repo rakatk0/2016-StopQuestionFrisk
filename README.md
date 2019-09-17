@@ -16,4 +16,4 @@ If the notebook will not run within Github, here is an [HTML version](#).
 
 Completing the pipeline, data analyzed and converted in the notebook above was pulled into a webmap.  
 
-Be sure to explore this data in a simple, interactive [webmap](https://github.com/rakatk0/2016-StopQuestionFrisk/map).
+Be sure to explore this data in a simple, interactive [webmap](https://github.com/rakatk0/2016-StopQuestionFrisk/map/index.html).
